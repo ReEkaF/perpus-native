@@ -56,9 +56,6 @@
                             <span>Logout</span> <!-- Menghilangkan sidebar-toggle-item yang tidak diperlukan -->
                         </a>
                     </li>
-
-
-
                 </ul>
             </div>
         </div>

@@ -100,27 +100,45 @@ function find_book($id)
   }
 }
 
-function update_book($p_id_buku,$p_kategori_buku, $p_judul_buku, $p_pengarang, $p_tahun_terbit, $p_stok)
+function update_book($p_id_buku, $p_kategori_buku, $p_judul_buku, $p_pengarang, $p_tahun_terbit, $p_stok)
 {
   try {
-    // Membuat koneksi PDO (jika belum ada)
+    // Membuat koneksi PDO
     $db = new PDO('mysql:host=localhost;dbname=' . DB_NAME, DB_USERNAME, DB_PASSWORD, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
-    // Menyiapkan dan memanggil stored procedure insert_buku
-    $statement = $db->prepare("CALL update_buku_with_stok(:id_buku,:input_stok,:input_kategori_buku_id,:input_judul_buku, :input_pengarang, :input_tahun_terbit, )");
+    // Query untuk menghitung jumlah peminjaman yang aktif (status != 0) untuk buku ini
+    $stmt = $db->prepare("SELECT COUNT(*) FROM peminjaman WHERE buku_id = :p_id_buku AND status != 1");
+    $stmt->bindParam(':p_id_buku', $p_id_buku);
+    $stmt->execute();
 
-    // Mengikat parameter ke variabel
-    $statement->bindParam(':id_buku', $p_id_buku);
-    $statement->bindParam(':input_kategori_buku_id', $p_kategori_buku);
-    $statement->bindParam(':input_judul_buku', $p_judul_buku);
-    $statement->bindParam(':input_pengarang', $p_pengarang);
-    $statement->bindParam(':tahun_terbit', $p_tahun_terbit);
-    $statement->bindParam(':input_stok', $p_stok);
+    // Mendapatkan jumlah peminjaman aktif
+    $jumlah_peminjaman_aktif = $stmt->fetchColumn();
 
-    // Menjalankan query
+    // Mengecek apakah stok buku yang akan diupdate cukup untuk mengurangi jumlah peminjaman aktif
+    if ($p_stok <= $jumlah_peminjaman_aktif) {
+      // Jika stok kurang dari jumlah peminjaman aktif, tidak bisa diupdate
+      echo "Stok tidak cukup untuk mengurangi peminjaman aktif. Update gagal.";
+      return;
+    }
+
+    // Query untuk update data buku
+    $statement = $db->prepare("UPDATE buku SET kategori_buku_id = :p_kategori_buku, judul_buku = :p_judul_buku, pengarang = :p_pengarang, tahun_terbit = :p_tahun_terbit, stok = :p_stok WHERE id_buku = :p_id_buku");
+    $statement->bindParam(':p_id_buku', $p_id_buku);
+    $statement->bindParam(':p_kategori_buku', $p_kategori_buku);
+    $statement->bindParam(':p_judul_buku', $p_judul_buku);
+    $statement->bindParam(':p_pengarang', $p_pengarang);
+    $statement->bindParam(':p_tahun_terbit', $p_tahun_terbit);
+    $statement->bindParam(':p_stok', $p_stok);
+
+    // Menjalankan query update
     $statement->execute();
 
-    echo "Data buku berhasil dimasukkan!";
+    // Cek apakah baris terpengaruh
+    if ($statement->rowCount() > 0) {
+      echo "Data berhasil diperbarui!";
+    } else {
+      echo "Data tidak berubah.";
+    }
   } catch (PDOException $e) {
     // Menangani error
     echo "Terjadi kesalahan: " . $e->getMessage();

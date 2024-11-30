@@ -14,8 +14,6 @@ require 'layouts/header.php';
 
 $errors = [];
 
-
-
 ?>
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -73,8 +71,7 @@ $errors = [];
                                 <td class="px-4 py-2 text-sm text-gray-700"><?= htmlspecialchars($b['nama_kategori_buku']) ?></td>
                                 <td class="px-4 py-2 text-sm text-gray-700"><?= htmlspecialchars($b['stok']) ?></td>
                                 <td class="px-4 py-2 text-sm text-gray-700">
-                                    <a href="./buku-edit.php?id_buku=<?= $b['id_buku'] ?>" class="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600">Edit</a> |
-                                    <a href="./buku-delete.php?id_buku=<?= $b['id_buku'] ?>" class="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600">Hapus</a>
+                                    <a href="./buku-edit.php?id_buku=<?= $b['id_buku'] ?>" class="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600">Edit</a> 
                                 </td>
                             </tr>
                         <?php endforeach; ?>
